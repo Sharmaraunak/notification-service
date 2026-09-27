@@ -1,3 +1,4 @@
+import uuid
 
 from pydantic import BaseModel
 from enum import Enum
@@ -19,6 +20,7 @@ class User(BaseModel):
 
 class Email:
     def __init__(self, to, subject, body):
+        self.id = uuid.uuid4()
         self.to = to
         self.subject = subject
         self.body = body

@@ -25,16 +25,20 @@ class EmailWorker:
         while self.running:
             try:
                 email: Email = self.broker.consume(timeout=1)
-
+                sent = False
                 while email.attempts < self.MAX_RETRIES:
                     try:
                         email.attempts += 1
-                        self.email_provider.send_email(email)
+                        self.email_provider.send_email(email=email)
+                        sent = True
+                        self.broker.acknowledge(message_id=email.id)
                         break
                     except Exception:
                         continue
+                if not sent:
+                    self.broker.move_to_dead_letter_queue(message=email)
+                    print("email moved to dead letter queue")
             except Empty:
-                ## TODO: will be replaced with retry policy of the failed tasks
                 continue
             except Exception as e:
                 ## TODO: add structured logging
