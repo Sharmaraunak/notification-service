@@ -22,6 +22,7 @@ class Email:
         self.to = to
         self.subject = subject
         self.body = body
+        self.attempts = 0
 
 
 class Resources:

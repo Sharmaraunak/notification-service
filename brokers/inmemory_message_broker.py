@@ -1,4 +1,5 @@
 import queue
+from queue import Queue
 
 from models.model import Email
 
@@ -7,11 +8,11 @@ from models.model import Email
 class InMemoryMessageBroker:
 
     def __init__(self):
-        self.queue = queue.Queue()
+        self.queue: Queue[Email] = queue.Queue()
 
 
-    def publish(self, message):
+    def publish(self, message: Email):
         self.queue.put(message)
 
-    def consume(self, timeout=None):
+    def consume(self, timeout=None) -> Email:
         return self.queue.get(timeout=timeout)

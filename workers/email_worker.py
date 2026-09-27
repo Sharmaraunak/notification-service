@@ -1,12 +1,16 @@
-import queue
+
 from queue import Empty
 from threading import Thread
 
 from brokers.inmemory_message_broker import InMemoryMessageBroker
+from models.model import Email
 from providers.email_provider import EmailProvider
 
 
 class EmailWorker:
+
+    MAX_RETRIES = 3
+
     def __init__(self, provider: EmailProvider, broker: InMemoryMessageBroker) -> None:
         self.email_provider = provider
         self.broker = broker
@@ -20,9 +24,17 @@ class EmailWorker:
         ## TODO: add graceful shutdown
         while self.running:
             try:
-                email = self.broker.consume(timeout=1)
-                self.email_provider.send_email(email)
+                email: Email = self.broker.consume(timeout=1)
+
+                while email.attempts < self.MAX_RETRIES:
+                    try:
+                        email.attempts += 1
+                        self.email_provider.send_email(email)
+                        break
+                    except Exception:
+                        continue
             except Empty:
+                ## TODO: will be replaced with retry policy of the failed tasks
                 continue
             except Exception as e:
                 ## TODO: add structured logging
