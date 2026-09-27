@@ -1,20 +1,23 @@
 
-from threading import Thread
+
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
 
 from application_resources import ApplicationResources
 
-
-def init_app():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
 
     ## create the resources
     application_resources = ApplicationResources()
     resources = application_resources.create_resources()
 
     ## start the worker
-    thread = Thread(target=resources.worker.run);
-    thread.start()
-
+    resources.worker.start()
     ## running the application
     yield
+
+    resources.worker.stop()
 
     ## TODO: graceful shutdown

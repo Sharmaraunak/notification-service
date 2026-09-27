@@ -1,5 +1,7 @@
 import queue
 
+from models.model import Email
+
 
 ### In house message broker
 class InMemoryMessageBroker:
@@ -11,5 +13,5 @@ class InMemoryMessageBroker:
     def publish(self, message):
         self.queue.put(message)
 
-    def consume(self):
-        return self.queue.get(timeout=1)
+    def consume(self, timeout=None):
+        return self.queue.get(timeout=timeout)

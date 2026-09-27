@@ -4,20 +4,14 @@
 from fastapi import FastAPI, HTTPException
 from starlette import status
 
-from init_application import init_app
+from init_application import lifespan
 from models.model import NotificationRequest
 from services.email_template_service import EmailTemplateService
 from data.user_list import  users
 
 
 
-app = FastAPI()
-
-init_app()
-
-
-
-
+app = FastAPI(lifespan=lifespan)
 
 @app.post("/notification", status_code=status.HTTP_202_ACCEPTED)
 async def send_notification(notification: NotificationRequest, ):
