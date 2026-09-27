@@ -1,5 +1,5 @@
 
-from model import User
+from models.model import User
 
 users = {
     101: User(

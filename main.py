@@ -1,23 +1,33 @@
 
 ### basic fastapi application for notification service
+import threading
 
 from fastapi import FastAPI, HTTPException
+from starlette import status
 
-from email_provider import EmailProvider
-from model import NotificationRequest
+from brokers.inmemory_message_broker import InMemoryMessageBroker
+from models.model import NotificationRequest
+from providers.email_provider import EmailProvider
 
-from email_template_service import EmailTemplateService
-from user_list import  users
+from services.email_template_service import EmailTemplateService
+from data.user_list import  users
+from workers.email_worker import EmailWorker
 
 app = FastAPI()
 
+message_broker: InMemoryMessageBroker = InMemoryMessageBroker()
+email_provider: EmailProvider = EmailProvider()
+worker: EmailWorker = EmailWorker(email_provider, message_broker)
+
+thread = threading.Thread(target=worker.run)
+thread.start()
 
 
-@app.post("/notification")
-async def send_notification(notification: NotificationRequest):
+@app.post("/notification", status_code=status.HTTP_202_ACCEPTED)
+async def send_notification(notification: NotificationRequest, ):
     user_id = notification.user_id
     email_template_service: EmailTemplateService = EmailTemplateService()
-    email_provider: EmailProvider = EmailProvider()
+
 
     try:
         ## find user
@@ -32,8 +42,9 @@ async def send_notification(notification: NotificationRequest):
         if email is None:
             raise HTTPException(status_code=404, detail="Email not found")
         else:
-            email_provider.send_email(email = email)
-            return {"message": "Notification sent successfully"}
+            ## implementing an in-memory queue
+            message_broker.publish(email)
+            return {"message": "Email send request accepted"}
 
     except HTTPException as e:
         raise e

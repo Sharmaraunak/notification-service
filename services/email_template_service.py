@@ -1,6 +1,6 @@
 
 
-from model import NotificationType, User, Email
+from models.model import NotificationType, User, Email
 
 
 class EmailTemplateService:
