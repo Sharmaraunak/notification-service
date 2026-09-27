@@ -22,3 +22,9 @@ class Email:
         self.to = to
         self.subject = subject
         self.body = body
+
+
+class Resources:
+    def __init__(self, worker):
+        ## TODO: more resources to be added later
+        self.worker = worker

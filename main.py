@@ -1,26 +1,22 @@
 
 ### basic fastapi application for notification service
-import threading
 
 from fastapi import FastAPI, HTTPException
 from starlette import status
 
-from brokers.inmemory_message_broker import InMemoryMessageBroker
+from init_application import init_app
 from models.model import NotificationRequest
-from providers.email_provider import EmailProvider
-
 from services.email_template_service import EmailTemplateService
 from data.user_list import  users
-from workers.email_worker import EmailWorker
+
+
 
 app = FastAPI()
 
-message_broker: InMemoryMessageBroker = InMemoryMessageBroker()
-email_provider: EmailProvider = EmailProvider()
-worker: EmailWorker = EmailWorker(email_provider, message_broker)
+init_app()
 
-thread = threading.Thread(target=worker.run)
-thread.start()
+
+
 
 
 @app.post("/notification", status_code=status.HTTP_202_ACCEPTED)

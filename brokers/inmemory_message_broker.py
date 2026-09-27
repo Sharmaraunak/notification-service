@@ -12,4 +12,4 @@ class InMemoryMessageBroker:
         self.queue.put(message)
 
     def consume(self):
-        return self.queue.get()
+        return self.queue.get(timeout=1)
